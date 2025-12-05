@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
@@ -60,6 +60,7 @@ const ChannelWizardPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState<ChannelCreatePayload>(() => {
     const empty = createEmptyChannel();
@@ -121,6 +122,13 @@ const ChannelWizardPage = () => {
     }
   };
 
+  // Автоскролл к началу контента при смене шага
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [currentStep]);
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!user?.uid) {
@@ -151,8 +159,8 @@ const ChannelWizardPage = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-slate-200">
+          <div className="space-y-2 md:space-y-4">
+            <label className="block text-xs font-medium text-slate-200 md:text-sm">
               Название канала *
             </label>
             <input
@@ -162,10 +170,10 @@ const ChannelWizardPage = () => {
                 setFormData({ ...formData, name: e.target.value })
               }
               placeholder="Например: Мой канал про технологии"
-              className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-brand focus:ring-2 focus:ring-brand/40"
+              className="w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-brand focus:ring-2 focus:ring-brand/40 md:rounded-xl md:px-4 md:py-3"
               autoFocus
             />
-            <p className="text-sm text-slate-400">
+            <p className="text-xs text-slate-400 md:text-sm">
               Это название будет отображаться в списке ваших каналов
             </p>
           </div>
@@ -173,11 +181,11 @@ const ChannelWizardPage = () => {
 
       case 2:
         return (
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-slate-200">
+          <div className="space-y-2 md:space-y-4">
+            <label className="block text-xs font-medium text-slate-200 md:text-sm">
               Выберите платформу *
             </label>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:gap-3">
               {PLATFORMS.map((platform) => (
                 <button
                   key={platform.value}
@@ -185,7 +193,7 @@ const ChannelWizardPage = () => {
                   onClick={() =>
                     setFormData({ ...formData, platform: platform.value })
                   }
-                  className={`rounded-xl border px-4 py-3 text-left transition ${
+                  className={`min-h-[44px] rounded-lg border px-3 py-2.5 text-left text-sm transition md:rounded-xl md:px-4 md:py-3 ${
                     formData.platform === platform.value
                       ? "border-brand bg-brand/10 text-white"
                       : "border-white/10 bg-slate-950/60 text-slate-300 hover:border-brand/40"
@@ -200,11 +208,11 @@ const ChannelWizardPage = () => {
 
       case 3:
         return (
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-slate-200">
+          <div className="space-y-2 md:space-y-4">
+            <label className="block text-xs font-medium text-slate-200 md:text-sm">
               Язык сценариев *
             </label>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-2 md:gap-3">
               {LANGUAGES.map((lang) => (
                 <button
                   key={lang.value}
@@ -212,7 +220,7 @@ const ChannelWizardPage = () => {
                   onClick={() =>
                     setFormData({ ...formData, language: lang.value })
                   }
-                  className={`rounded-xl border px-4 py-3 text-center transition ${
+                  className={`min-h-[44px] rounded-lg border px-2 py-2.5 text-center text-sm transition md:rounded-xl md:px-4 md:py-3 ${
                     formData.language === lang.value
                       ? "border-brand bg-brand/10 text-white"
                       : "border-white/10 bg-slate-950/60 text-slate-300 hover:border-brand/40"
@@ -227,11 +235,11 @@ const ChannelWizardPage = () => {
 
       case 4:
         return (
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-slate-200">
+          <div className="space-y-2 md:space-y-4">
+            <label className="block text-xs font-medium text-slate-200 md:text-sm">
               Длительность ролика (секунды) *
             </label>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 md:gap-3">
               {DURATIONS.map((duration) => (
                 <button
                   key={duration}
@@ -239,7 +247,7 @@ const ChannelWizardPage = () => {
                   onClick={() =>
                     setFormData({ ...formData, targetDurationSec: duration })
                   }
-                  className={`rounded-xl border px-4 py-3 text-center transition ${
+                  className={`min-h-[44px] rounded-lg border px-3 py-2.5 text-center text-sm transition md:rounded-xl md:px-4 md:py-3 ${
                     formData.targetDurationSec === duration
                       ? "border-brand bg-brand/10 text-white"
                       : "border-white/10 bg-slate-950/60 text-slate-300 hover:border-brand/40"
@@ -254,8 +262,8 @@ const ChannelWizardPage = () => {
 
       case 5:
         return (
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-slate-200">
+          <div className="space-y-2 md:space-y-4">
+            <label className="block text-xs font-medium text-slate-200 md:text-sm">
               Ниша / Тематика *
             </label>
             <input
@@ -265,10 +273,10 @@ const ChannelWizardPage = () => {
                 setFormData({ ...formData, niche: e.target.value })
               }
               placeholder="Например: Технологии, Кулинария, Спорт, Образование"
-              className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-brand focus:ring-2 focus:ring-brand/40"
+              className="w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-brand focus:ring-2 focus:ring-brand/40 md:rounded-xl md:px-4 md:py-3"
               autoFocus
             />
-            <p className="text-sm text-slate-400">
+            <p className="text-xs text-slate-400 md:text-sm">
               Основная тематика вашего контента
             </p>
           </div>
@@ -276,8 +284,8 @@ const ChannelWizardPage = () => {
 
       case 6:
         return (
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-slate-200">
+          <div className="space-y-2 md:space-y-4">
+            <label className="block text-xs font-medium text-slate-200 md:text-sm">
               Целевая аудитория *
             </label>
             <textarea
@@ -287,10 +295,10 @@ const ChannelWizardPage = () => {
               }
               placeholder="Например: Молодёжь 18-25 лет, интересующаяся технологиями"
               rows={4}
-              className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-brand focus:ring-2 focus:ring-brand/40"
+              className="w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-brand focus:ring-2 focus:ring-brand/40 md:rounded-xl md:px-4 md:py-3"
               autoFocus
             />
-            <p className="text-sm text-slate-400">
+            <p className="text-xs text-slate-400 md:text-sm">
               Опишите вашу целевую аудиторию
             </p>
           </div>
@@ -298,17 +306,17 @@ const ChannelWizardPage = () => {
 
       case 7:
         return (
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-slate-200">
+          <div className="space-y-2 md:space-y-4">
+            <label className="block text-xs font-medium text-slate-200 md:text-sm">
               Тон / Стиль контента *
             </label>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:gap-3">
               {TONES.map((tone) => (
                 <button
                   key={tone}
                   type="button"
                   onClick={() => setFormData({ ...formData, tone })}
-                  className={`rounded-xl border px-4 py-3 text-center transition ${
+                  className={`min-h-[44px] rounded-lg border px-3 py-2.5 text-center text-sm transition md:rounded-xl md:px-4 md:py-3 ${
                     formData.tone === tone
                       ? "border-brand bg-brand/10 text-white"
                       : "border-white/10 bg-slate-950/60 text-slate-300 hover:border-brand/40"
@@ -318,7 +326,7 @@ const ChannelWizardPage = () => {
                 </button>
               ))}
             </div>
-            <p className="text-sm text-slate-400">
+            <p className="text-xs text-slate-400 md:text-sm">
               Выберите основной тон для ваших сценариев
             </p>
           </div>
@@ -326,8 +334,8 @@ const ChannelWizardPage = () => {
 
       case 8:
         return (
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-slate-200">
+          <div className="space-y-2 md:space-y-4">
+            <label className="block text-xs font-medium text-slate-200 md:text-sm">
               Запрещённые темы (опционально)
             </label>
             <textarea
@@ -337,10 +345,10 @@ const ChannelWizardPage = () => {
               }
               placeholder="Например: Политика, Насилие, Нецензурная лексика"
               rows={4}
-              className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-brand focus:ring-2 focus:ring-brand/40"
+              className="w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-brand focus:ring-2 focus:ring-brand/40 md:rounded-xl md:px-4 md:py-3"
               autoFocus
             />
-            <p className="text-sm text-slate-400">
+            <p className="text-xs text-slate-400 md:text-sm">
               Укажите темы, которые не должны появляться в сценариях
             </p>
           </div>
@@ -348,11 +356,11 @@ const ChannelWizardPage = () => {
 
       case 9:
         return (
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-slate-200">
+          <div className="space-y-2 md:space-y-4">
+            <label className="block text-xs font-medium text-slate-200 md:text-sm">
               Режим генерации *
             </label>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 md:gap-3">
               <button
                 type="button"
                 onClick={() =>
@@ -361,14 +369,14 @@ const ChannelWizardPage = () => {
                     generationMode: "script"
                   })
                 }
-                className={`rounded-xl border px-4 py-4 text-left transition ${
+                className={`min-h-[44px] rounded-lg border px-3 py-2.5 text-left transition md:rounded-xl md:px-4 md:py-4 ${
                   (formData.generationMode || "script") === "script"
                     ? "border-brand bg-brand/10 text-white"
                     : "border-white/10 bg-slate-950/60 text-slate-300 hover:border-brand/40"
                 }`}
               >
-                <div className="font-semibold">Сценарий</div>
-                <div className="mt-1 text-xs text-slate-400">
+                <div className="text-sm font-semibold md:text-base">Сценарий</div>
+                <div className="mt-0.5 text-[10px] text-slate-400 md:mt-1 md:text-xs">
                   Только подробный сценарий
                 </div>
               </button>
@@ -380,14 +388,14 @@ const ChannelWizardPage = () => {
                     generationMode: "prompt"
                   })
                 }
-                className={`rounded-xl border px-4 py-4 text-left transition ${
+                className={`min-h-[44px] rounded-lg border px-3 py-2.5 text-left transition md:rounded-xl md:px-4 md:py-4 ${
                   formData.generationMode === "prompt"
                     ? "border-brand bg-brand/10 text-white"
                     : "border-white/10 bg-slate-950/60 text-slate-300 hover:border-brand/40"
                 }`}
               >
-                <div className="font-semibold">Сценарий + промпт для видео</div>
-                <div className="mt-1 text-xs text-slate-400">
+                <div className="text-sm font-semibold md:text-base">Сценарий + промпт для видео</div>
+                <div className="mt-0.5 text-[10px] text-slate-400 md:mt-1 md:text-xs">
                   Сценарий + VIDEO_PROMPT для Sora/Veo
                 </div>
               </button>
@@ -399,19 +407,19 @@ const ChannelWizardPage = () => {
                     generationMode: "video-prompt-only"
                   })
                 }
-                className={`rounded-xl border px-4 py-4 text-left transition ${
+                className={`min-h-[44px] rounded-lg border px-3 py-2.5 text-left transition md:rounded-xl md:px-4 md:py-4 ${
                   formData.generationMode === "video-prompt-only"
                     ? "border-brand bg-brand/10 text-white"
                     : "border-white/10 bg-slate-950/60 text-slate-300 hover:border-brand/40"
                 }`}
               >
-                <div className="font-semibold">Промпт для видео</div>
-                <div className="mt-1 text-xs text-slate-400">
+                <div className="text-sm font-semibold md:text-base">Промпт для видео</div>
+                <div className="mt-0.5 text-[10px] text-slate-400 md:mt-1 md:text-xs">
                   Только VIDEO_PROMPT для Sora/Veo без текста сценария
                 </div>
               </button>
             </div>
-            <p className="text-sm text-slate-400">
+            <p className="text-xs text-slate-400 md:text-sm">
               Выберите, что будет генерироваться при создании сценариев
             </p>
           </div>
@@ -430,8 +438,8 @@ const ChannelWizardPage = () => {
         };
 
         return (
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-slate-200">
+          <div className="space-y-2 md:space-y-4">
+            <label className="block text-xs font-medium text-slate-200 md:text-sm">
               Дополнительные пожелания (опционально)
             </label>
             <textarea
@@ -439,9 +447,9 @@ const ChannelWizardPage = () => {
               onChange={handleExtraNotesChange}
               placeholder="Любые дополнительные требования к сценариям... Например: «бабушка и дедушка — казахи», особенности персонажей, сеттинг, стиль съёмки."
               rows={5}
-              className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-brand focus:ring-2 focus:ring-brand/40 min-h-[140px] h-auto resize-y overflow-auto"
+              className="w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-brand focus:ring-2 focus:ring-brand/40 min-h-[120px] h-auto resize-y overflow-auto md:rounded-xl md:px-4 md:py-3 md:min-h-[140px]"
             />
-            <p className="text-sm text-slate-400">
+            <p className="text-xs text-slate-400 md:text-sm">
               Этот блок используется как обязательные условия при генерации сценария и VIDEO_PROMPT, поэтому подробно опишите важные детали (национальность, характеры, стиль и т.п.).
             </p>
           </div>
@@ -454,90 +462,133 @@ const ChannelWizardPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 px-4 py-10 text-white">
-      <div className="mx-auto w-full max-w-3xl">
-        <div className="mb-8 flex items-center gap-4">
+    <div className="min-h-screen bg-slate-950 text-white">
+      <div className="mx-auto w-full max-w-3xl px-3 py-4 md:px-4 md:py-10">
+        {/* Шапка - компактная на мобильных */}
+        <div className="mb-4 flex items-center gap-2 md:mb-8 md:gap-4">
           <button
             type="button"
             onClick={() => navigate("/channels")}
-            className="rounded-xl border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-slate-300 transition hover:border-brand/40 hover:text-white"
+            className="flex min-h-[40px] min-w-[40px] items-center justify-center rounded-xl border border-white/10 bg-slate-900/60 text-slate-300 transition hover:border-brand/40 hover:text-white md:px-4 md:py-2"
+            title="Назад"
           >
-            <ArrowLeft size={16} className="inline mr-2" />
-            Назад
+            <ArrowLeft size={18} className="md:mr-2" />
+            <span className="hidden md:inline">Назад</span>
           </button>
-          <div className="flex items-center gap-2">
-            <Sparkles size={20} className="text-brand-light" />
-            <h1 className="text-2xl font-semibold">Мастер создания канала</h1>
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <Sparkles size={18} className="text-brand-light flex-shrink-0 md:w-5 md:h-5" />
+            <h1 className="text-lg font-semibold truncate md:text-2xl">Мастер создания канала</h1>
           </div>
         </div>
 
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            {STEPS.map((step, index) => (
-              <div key={step.id} className="flex items-center flex-1">
-                <div className="flex flex-col items-center flex-1">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition ${
-                      currentStep > step.id
-                        ? "border-brand bg-brand text-white"
-                        : currentStep === step.id
-                        ? "border-brand bg-brand/20 text-brand-light"
-                        : "border-white/20 bg-slate-900/60 text-slate-400"
-                    }`}
-                  >
-                    {currentStep > step.id ? (
-                      <Check size={18} />
-                    ) : (
-                      <span className="text-sm font-semibold">{step.id}</span>
+        {/* Индикатор шагов - упрощенный на мобильных */}
+        <div className="mb-4 md:mb-8">
+          {/* Десктопная версия - полный индикатор */}
+          <div className="hidden md:block">
+            <div className="flex items-center justify-between">
+              {STEPS.map((step, index) => (
+                <div key={step.id} className="flex items-center flex-1">
+                  <div className="flex flex-col items-center flex-1">
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition ${
+                        currentStep > step.id
+                          ? "border-brand bg-brand text-white"
+                          : currentStep === step.id
+                          ? "border-brand bg-brand/20 text-brand-light"
+                          : "border-white/20 bg-slate-900/60 text-slate-400"
+                      }`}
+                    >
+                      {currentStep > step.id ? (
+                        <Check size={18} />
+                      ) : (
+                        <span className="text-sm font-semibold">{step.id}</span>
+                      )}
+                    </div>
+                    <span
+                      className={`mt-2 text-xs text-center ${
+                        currentStep === step.id
+                          ? "text-brand-light font-medium"
+                          : "text-slate-500"
+                      }`}
+                    >
+                      {step.title}
+                    </span>
+                  </div>
+                  {index < STEPS.length - 1 && (
+                    <div
+                      className={`h-0.5 flex-1 mx-2 transition ${
+                        currentStep > step.id ? "bg-brand" : "bg-white/10"
+                      }`}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Мобильная версия - горизонтальный скролл по шагам */}
+          <div className="md:hidden">
+            <div className="overflow-x-auto -mx-3 px-3 pb-2">
+              <div className="flex items-center gap-2 min-w-max">
+                {STEPS.map((step, index) => (
+                  <div key={step.id} className="flex items-center flex-shrink-0">
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition ${
+                          currentStep > step.id
+                            ? "border-brand bg-brand text-white"
+                            : currentStep === step.id
+                            ? "border-brand bg-brand/20 text-brand-light"
+                            : "border-white/20 bg-slate-900/60 text-slate-400"
+                        }`}
+                      >
+                        {currentStep > step.id ? (
+                          <Check size={14} />
+                        ) : (
+                          <span className="text-xs font-semibold">{step.id}</span>
+                        )}
+                      </div>
+                    </div>
+                    {index < STEPS.length - 1 && (
+                      <div
+                        className={`h-0.5 w-3 mx-1 transition ${
+                          currentStep > step.id ? "bg-brand" : "bg-white/10"
+                        }`}
+                      />
                     )}
                   </div>
-                  <span
-                    className={`mt-2 text-xs text-center ${
-                      currentStep === step.id
-                        ? "text-brand-light font-medium"
-                        : "text-slate-500"
-                    }`}
-                  >
-                    {step.title}
-                  </span>
-                </div>
-                {index < STEPS.length - 1 && (
-                  <div
-                    className={`h-0.5 flex-1 mx-2 transition ${
-                      currentStep > step.id ? "bg-brand" : "bg-white/10"
-                    }`}
-                  />
-                )}
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-8 shadow-2xl shadow-brand/10">
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-white">
+          <div className="rounded-xl border border-white/10 bg-slate-900/60 p-4 shadow-2xl shadow-brand/10 md:rounded-2xl md:p-8">
+            <div className="mb-3 md:mb-6" ref={contentRef}>
+              <h2 className="text-base font-semibold text-white md:text-xl">
                 Шаг {currentStep} из {STEPS.length}: {STEPS[currentStep - 1].title}
               </h2>
             </div>
 
             {error && (
-              <div className="mb-6 rounded-lg border border-red-500/30 bg-red-950/40 px-4 py-3 text-sm text-red-200">
+              <div className="mb-4 rounded-lg border border-red-500/30 bg-red-950/40 px-3 py-2 text-xs text-red-200 md:mb-6 md:px-4 md:py-3 md:text-sm">
                 {error}
               </div>
             )}
 
-            <div className="min-h-[300px]">{renderStepContent()}</div>
+            <div className="min-h-[200px] md:min-h-[300px] pb-20 md:pb-0">{renderStepContent()}</div>
 
-            <div className="mt-8 flex items-center justify-between gap-4">
+            {/* Кнопки навигации - закреплены внизу на мобильных */}
+            <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center gap-2 border-t border-white/10 bg-slate-950/95 p-3 backdrop-blur-sm md:relative md:bottom-auto md:left-auto md:right-auto md:z-auto md:mt-8 md:border-t-0 md:bg-transparent md:backdrop-blur-none md:p-0">
               <button
                 type="button"
                 onClick={handleBack}
                 disabled={currentStep === 1}
-                className="flex items-center gap-2 rounded-xl border border-white/10 bg-slate-950/60 px-5 py-3 text-sm font-medium text-slate-300 transition disabled:cursor-not-allowed disabled:opacity-50 hover:border-brand/40 hover:text-white"
+                className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm font-medium text-slate-300 transition disabled:cursor-not-allowed disabled:opacity-50 hover:border-brand/40 hover:text-white md:flex-initial md:px-5 md:py-3"
               >
                 <ArrowLeft size={16} />
-                Назад
+                <span className="hidden sm:inline">Назад</span>
               </button>
 
               {currentStep < STEPS.length ? (
@@ -545,26 +596,27 @@ const ChannelWizardPage = () => {
                   type="button"
                   onClick={handleNext}
                   disabled={!canGoNext()}
-                  className="flex items-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-brand-dark"
+                  className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-brand-dark md:flex-initial md:px-5 md:py-3"
                 >
-                  Далее
+                  <span>Далее</span>
                   <ArrowRight size={16} />
                 </button>
               ) : (
                 <button
                   type="submit"
                   disabled={loading || !canGoNext()}
-                  className="flex items-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-brand-dark"
+                  className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-brand-dark md:flex-initial md:px-5 md:py-3"
                 >
                   {loading ? (
                     <>
                       <Loader2 size={16} className="animate-spin" />
-                      Создание...
+                      <span className="hidden sm:inline">Создание...</span>
                     </>
                   ) : (
                     <>
                       <Check size={16} />
-                      Создать канал
+                      <span className="hidden sm:inline">Создать канал</span>
+                      <span className="sm:hidden">Создать</span>
                     </>
                   )}
                 </button>
