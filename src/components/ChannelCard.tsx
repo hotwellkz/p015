@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calendar, Clock, Languages, Users, Sparkles, GripVertical, FileText } from "lucide-react";
+import { Calendar, Clock, Languages, Users, Sparkles, GripVertical, FileText, ChevronDown, MoreVertical } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Channel } from "../domain/channel";
@@ -40,6 +40,8 @@ const ChannelCard = ({
   onCustomPrompt
 }: ChannelCardProps) => {
   const [showDetails, setShowDetails] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showMobileActionsMenu, setShowMobileActionsMenu] = useState(false);
   
   const {
     attributes,
@@ -90,21 +92,33 @@ const ChannelCard = ({
     setShowDetails(false);
   };
 
-  if (!compact) {
-    // Пока используем только компактный режим
-  }
+  // Формируем краткое резюме для мобильной версии
+  const scheduleInfo = channel.autoSendSchedules && channel.autoSendSchedules.length > 0
+    ? `${channel.autoSendSchedules.length} ${channel.autoSendSchedules.length === 1 ? 'публикация' : channel.autoSendSchedules.length < 5 ? 'публикации' : 'публикаций'}/день`
+    : null;
+  
+  const summaryParts = [
+    `Язык: ${languageLabels[channel.language]}`,
+    scheduleInfo || `${channel.targetDurationSec} сек`,
+    channel.niche ? `ниша: ${channel.niche}` : null
+  ].filter(Boolean);
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-slate-900/60 p-4 text-white shadow-sm transition hover:border-brand/50 hover:shadow-lg ${
-        isDragging ? "z-50 scale-105 shadow-2xl" : ""
+      className={`w-full ${
+        isDragging ? "z-50 scale-105 shadow-2xl opacity-50" : ""
       }`}
-      onMouseLeave={() => {
-        if (!isTouchDevice) setShowDetails(false);
-      }}
     >
+      {/* Десктопная версия */}
+      <div
+        className={`hidden md:block group relative rounded-2xl border border-white/10 bg-slate-900/60 p-4 text-white shadow-sm transition hover:border-brand/50 hover:shadow-lg`}
+        onMouseLeave={() => {
+          if (!isTouchDevice) setShowDetails(false);
+        }}
+      >
+        <div className="flex flex-col justify-between h-full">
       {/* Заголовок: номер + имя + платформа */}
       <div className="mb-2 flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
@@ -332,6 +346,243 @@ const ChannelCard = ({
           </div>
         )
       )}
+        </div>
+      </div>
+
+      {/* Мобильная версия - карточка с двумя состояниями */}
+      <div
+        className={`md:hidden w-full rounded-xl border border-white/10 bg-slate-900/60 text-white transition`}
+      >
+        {/* Сжатое состояние - всегда видно */}
+        <div className="p-3">
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <button
+                  type="button"
+                  {...attributes}
+                  {...listeners}
+                  className="cursor-grab active:cursor-grabbing touch-none text-slate-400 hover:text-slate-200 transition-colors flex-shrink-0"
+                  title="Перетащите для изменения порядка"
+                  aria-label="Перетащить канал"
+                >
+                  <GripVertical size={14} />
+                </button>
+                <div className="text-sm font-semibold text-white truncate">
+                  {number}. {channel.name}
+                </div>
+              </div>
+              <div className="inline-flex items-center gap-1 rounded-full bg-slate-800/80 px-2 py-0.5 text-[10px] text-slate-200 mb-1">
+                <span className="h-1 w-1 rounded-full bg-emerald-400" />
+                <span>{platformLabels[channel.platform]}</span>
+              </div>
+              <div className="text-[11px] text-slate-400 line-clamp-1">
+                {summaryParts.join(" • ")}
+              </div>
+            </div>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              {hasSocialLinks && (
+                <div className="flex items-center gap-0.5 mr-1">
+                  {channel.youtubeUrl && (
+                    <button
+                      type="button"
+                      onClick={(e) => handleSocialClick(e, channel.youtubeUrl!)}
+                      className="flex h-5 w-5 items-center justify-center rounded-full bg-red-600/20 text-[9px] text-red-400"
+                      title="YouTube"
+                    >
+                      YT
+                    </button>
+                  )}
+                  {channel.tiktokUrl && (
+                    <button
+                      type="button"
+                      onClick={(e) => handleSocialClick(e, channel.tiktokUrl!)}
+                      className="flex h-5 w-5 items-center justify-center rounded-full bg-black text-[9px] text-white"
+                      title="TikTok"
+                    >
+                      TT
+                    </button>
+                  )}
+                  {channel.instagramUrl && (
+                    <button
+                      type="button"
+                      onClick={(e) => handleSocialClick(e, channel.instagramUrl!)}
+                      className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 text-[9px] text-white"
+                      title="Instagram"
+                    >
+                      IG
+                    </button>
+                  )}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="flex min-h-[32px] min-w-[32px] items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800/50 hover:text-white"
+                aria-label={isExpanded ? "Свернуть" : "Развернуть"}
+              >
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Основные кнопки действий - всегда видно */}
+          <div className="flex items-center gap-2 mt-2">
+            <button
+              type="button"
+              onClick={onGenerate}
+              className="flex-1 min-h-[40px] rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-dark"
+            >
+              Сгенерировать
+            </button>
+            {onCustomPrompt && (
+              <button
+                type="button"
+                onClick={onCustomPrompt}
+                className="min-h-[40px] rounded-lg border border-white/15 bg-slate-800/50 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-brand/50 hover:bg-slate-700/50 hover:text-white"
+                title="Свой промпт"
+              >
+                <FileText size={14} />
+              </button>
+            )}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowMobileActionsMenu(!showMobileActionsMenu)}
+                className="flex min-h-[40px] min-w-[40px] items-center justify-center rounded-lg border border-white/15 bg-slate-800/50 text-slate-300 transition hover:bg-slate-700/50"
+                aria-label="Дополнительные действия"
+              >
+                <MoreVertical size={16} />
+              </button>
+              {showMobileActionsMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-30"
+                    onClick={() => setShowMobileActionsMenu(false)}
+                  />
+                  <div className="absolute right-0 top-full z-40 mt-1 w-40 rounded-lg border border-white/10 bg-slate-900/95 p-2 shadow-xl backdrop-blur-xl">
+                    {onAutoGenerate && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onAutoGenerate();
+                          setShowMobileActionsMenu(false);
+                        }}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-slate-200 transition hover:bg-slate-800/50"
+                      >
+                        <Sparkles size={14} />
+                        ИИ-идея
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onEdit();
+                        setShowMobileActionsMenu(false);
+                      }}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-slate-200 transition hover:bg-slate-800/50"
+                    >
+                      Редактировать
+                    </button>
+                    <div className="my-1 border-t border-white/10" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onDelete();
+                        setShowMobileActionsMenu(false);
+                      }}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-red-400 transition hover:bg-red-500/10"
+                    >
+                      Удалить
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Раскрываемая часть */}
+        {isExpanded && (
+          <div className="border-t border-white/10 px-3 pb-3 pt-2 space-y-2">
+            {/* Полное описание */}
+            {channel.extraNotes && (
+              <div>
+                <div className="text-[10px] font-semibold text-slate-400 mb-1">Описание</div>
+                <p className="text-xs text-slate-300 line-clamp-3">
+                  {channel.extraNotes}
+                </p>
+              </div>
+            )}
+
+            {/* Параметры в виде компактного списка */}
+            <div className="space-y-1">
+              <div className="text-[10px] font-semibold text-slate-400 mb-1">Параметры</div>
+              <div className="flex flex-wrap gap-1.5">
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-800/50 px-2 py-0.5 text-[10px] text-slate-300">
+                  <Clock size={10} />
+                  {channel.targetDurationSec} сек
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-800/50 px-2 py-0.5 text-[10px] text-slate-300">
+                  <Languages size={10} />
+                  {languageLabels[channel.language]}
+                </span>
+                {channel.audience && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-800/50 px-2 py-0.5 text-[10px] text-slate-300">
+                    <Users size={10} />
+                    {channel.audience}
+                  </span>
+                )}
+                {channel.niche && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-800/50 px-2 py-0.5 text-[10px] text-slate-300">
+                    {channel.niche}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Запрещенные темы */}
+            {channel.blockedTopics && (
+              <div>
+                <div className="text-[10px] font-semibold text-slate-400 mb-1">Запрещено</div>
+                <p className="text-xs text-slate-300 line-clamp-2">
+                  {channel.blockedTopics}
+                </p>
+              </div>
+            )}
+
+            {/* Все кнопки действий в раскрытом состоянии */}
+            <div className="flex flex-wrap gap-2 pt-2">
+              {onAutoGenerate && (
+                <button
+                  type="button"
+                  onClick={onAutoGenerate}
+                  className="flex items-center gap-1.5 rounded-lg bg-brand/80 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-dark"
+                >
+                  <Sparkles size={12} />
+                  ИИ-идея
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onEdit}
+                className="flex items-center gap-1.5 rounded-lg border border-white/15 px-3 py-2 text-xs text-slate-200 transition hover:border-brand/50 hover:text-white"
+              >
+                Редактировать
+              </button>
+              <button
+                type="button"
+                onClick={onDelete}
+                className="flex items-center gap-1.5 rounded-lg border border-red-500/30 px-3 py-2 text-xs text-red-400 transition hover:bg-red-500/10"
+              >
+                Удалить
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

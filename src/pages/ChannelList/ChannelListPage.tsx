@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, Plus, Video, Wand2, Calendar } from "lucide-react";
+import { Loader2, Plus, Video, Wand2, Calendar, MoreVertical } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   DndContext,
@@ -47,6 +47,7 @@ const ChannelListPage = () => {
   const [selectedChannelForCustomPrompt, setSelectedChannelForCustomPrompt] =
     useState<Channel | null>(null);
   const [localChannels, setLocalChannels] = useState<Channel[]>([]);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   // Синхронизируем локальное состояние с глобальным
   useEffect(() => {
@@ -156,9 +157,10 @@ const ChannelListPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 px-4 py-10 text-white">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-        <header className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900 to-slate-950 p-8 shadow-2xl shadow-brand/10">
+    <div className="min-h-screen bg-slate-950 px-3 py-4 text-white sm:px-4 sm:py-10">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 sm:gap-8">
+        {/* Десктопная версия заголовка */}
+        <header className="hidden flex-col gap-4 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900 to-slate-950 p-8 shadow-2xl shadow-brand/10 md:flex">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex-1">
               <p className="text-sm uppercase tracking-[0.3em] text-slate-500">
@@ -214,6 +216,71 @@ const ChannelListPage = () => {
           )}
         </header>
 
+        {/* Мобильная версия заголовка */}
+        <div className="flex flex-col gap-3 md:hidden">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold text-white">
+              Ваши каналы ({channels.length})
+            </h1>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowMobileMenu(!showMobileMenu)}
+                  className="flex min-h-[40px] min-w-[40px] items-center justify-center rounded-lg border border-white/10 bg-slate-900/50 p-2 text-slate-300 transition hover:bg-slate-800/50"
+                  aria-label="Меню"
+                >
+                  <MoreVertical size={20} />
+                </button>
+                {showMobileMenu && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-30"
+                      onClick={() => setShowMobileMenu(false)}
+                    />
+                    <div className="absolute right-0 top-full z-40 mt-2 w-48 rounded-lg border border-white/10 bg-slate-900/95 p-2 shadow-xl backdrop-blur-xl">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigate("/channels/schedule");
+                          setShowMobileMenu(false);
+                        }}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-800/50"
+                      >
+                        <Calendar size={16} />
+                        Расписание
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigate("/scripts");
+                          setShowMobileMenu(false);
+                        }}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-800/50"
+                      >
+                        <Wand2 size={16} />
+                        Генератор
+                      </button>
+                      <div className="my-2 border-t border-white/10" />
+                      <div className="px-3 py-2">
+                        <UserMenu />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={goToWizard}
+            className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-dark"
+          >
+            <Plus size={18} />
+            Создать канал
+          </button>
+        </div>
+
         {loading && (
           <div className="flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900/60 py-16">
             <div className="flex items-center gap-3 text-slate-300">
@@ -261,7 +328,7 @@ const ChannelListPage = () => {
               items={localChannels.map((ch) => ch.id)}
               strategy={rectSortingStrategy}
             >
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                 {localChannels.map((channel, index) => (
                   <ChannelCard
                     key={channel.id}
