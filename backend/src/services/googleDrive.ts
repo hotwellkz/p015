@@ -1,4 +1,4 @@
-import { google } from "googleapis";
+import { google, drive_v3 } from "googleapis";
 import { Readable } from "stream";
 import * as fs from "fs";
 import { Logger } from "../utils/logger";
@@ -9,9 +9,9 @@ const DRIVE_FULL_SCOPE = ["https://www.googleapis.com/auth/drive"];
 /**
  * Создаёт и возвращает клиент Google Drive API, используя Service Account
  * @param useFullScope - Если true, использует полный scope для создания папок и управления правами
- * @returns {google.drive_v3.Drive} Клиент Google Drive
+ * @returns {drive_v3.Drive} Клиент Google Drive
  */
-function getDriveClient(useFullScope: boolean = false) {
+function getDriveClient(useFullScope: boolean = false): drive_v3.Drive {
   const clientEmail = process.env.GOOGLE_DRIVE_CLIENT_EMAIL;
   const privateKeyRaw = process.env.GOOGLE_DRIVE_PRIVATE_KEY;
 
@@ -48,7 +48,7 @@ function getDriveClient(useFullScope: boolean = false) {
  * @returns {Promise<void>}
  */
 async function validateFolderAccess(
-  drive: google.drive_v3.Drive,
+  drive: drive_v3.Drive,
   folderId: string
 ): Promise<void> {
   try {
@@ -129,7 +129,7 @@ export async function uploadVideoToDrive(
   const drive = getDriveClient(true);
 
   // Определяем, какую папку использовать: сначала пробуем из канала, если не найдена - используем defaultParent
-  let parentFolderId: string;
+  let parentFolderId: string = "";
   let usedDefaultParent = false;
 
   try {
@@ -336,7 +336,7 @@ export async function uploadFileToDrive(params: {
   const drive = getDriveClient(true);
 
   // Определяем, какую папку использовать
-  let finalParentFolderId: string;
+  let finalParentFolderId: string = "";
   let usedDefaultParent = false;
 
   try {

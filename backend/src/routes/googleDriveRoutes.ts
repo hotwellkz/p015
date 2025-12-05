@@ -53,7 +53,10 @@ router.post("/create-folder", authRequired, async (req, res) => {
 
   try {
     // Создаём папку через сервис
-    const result = await createFolder(folderName.trim(), parentId?.trim());
+    const result = await createFolder({
+      folderName: folderName.trim(),
+      parentId: parentId?.trim()
+    });
 
     Logger.info("Folder created successfully", {
       userId,

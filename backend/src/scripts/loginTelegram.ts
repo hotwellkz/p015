@@ -76,7 +76,7 @@ async function main() {
     process.exit(1);
   }
 
-  const stringSession = client.session.save() as string;
+  const stringSession = String(client.session.save());
   saveSessionString(stringSession);
 
   // eslint-disable-next-line no-console

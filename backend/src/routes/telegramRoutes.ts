@@ -14,7 +14,7 @@ import {
 } from "../services/sendPromptFromUserToSyntx";
 import { loadSessionString } from "../telegram/sessionStore";
 import { createTelegramClientFromStringSession } from "../telegram/client";
-import type { Api } from "telegram";
+import { Api } from "telegram/tl";
 import { uploadVideoToDrive, uploadFileToDrive } from "../services/googleDrive";
 import { uploadFileToDriveWithOAuth } from "../services/googleDriveOAuth";
 import { getUserOAuthTokens, updateUserAccessToken } from "../repositories/userOAuthTokensRepo";
@@ -104,20 +104,35 @@ router.post("/confirm", authRequired, async (req, res) => {
     }
 
     try {
-      await state.client.signIn({
-        phoneNumber: phone,
-        phoneCode: code,
-        phoneCodeHash: loginSession.phoneCodeHash
-      });
+      // Используем правильные методы Telegram API
+      await state.client.invoke(
+        new Api.auth.SignIn({
+          phoneNumber: phone,
+          phoneCode: code,
+          phoneCodeHash: loginSession.phoneCodeHash
+        })
+      );
     } catch (err: any) {
       const msg = String(err?.message ?? err);
-      if (msg.includes("SESSION_PASSWORD_NEEDED")) {
+      if (msg.includes("SESSION_PASSWORD_NEEDED") || err?.errorMessage?.includes("SESSION_PASSWORD_NEEDED")) {
         if (!password) {
           return res
             .status(400)
             .json({ error: "PASSWORD_REQUIRED_FOR_2FA" });
         }
-        await state.client.checkPassword(password);
+        // Используем правильный метод для проверки пароля
+        const pwd = await state.client.invoke(new Api.account.GetPassword());
+        if (!pwd.currentAlgo) {
+          return res.status(400).json({ error: "PASSWORD_ALGO_NOT_AVAILABLE" });
+        }
+        // Вычисляем хеш пароля вручную
+        const { computeCheck } = await import("telegram/Password");
+        const passwordHash = await computeCheck(pwd, password);
+        await state.client.invoke(
+          new Api.auth.CheckPassword({
+            password: passwordHash
+          })
+        );
       } else {
         return res
           .status(400)
@@ -125,7 +140,7 @@ router.post("/confirm", authRequired, async (req, res) => {
       }
     }
 
-    const stringSession = state.client.session.save() as string;
+    const stringSession = String(state.client.session.save());
     const encrypted = encrypt(stringSession);
 
     const account = await telegramAccountRepository.upsertForUser(

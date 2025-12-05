@@ -138,9 +138,9 @@ router.get("/google/callback", async (req, res) => {
     // Сохраняем токены в Firestore
     try {
       await saveUserOAuthTokens(userId, {
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-        expiry_date: tokens.expiry_date
+        access_token: tokens.access_token ?? undefined,
+        refresh_token: tokens.refresh_token ?? undefined,
+        expiry_date: tokens.expiry_date ?? undefined
       });
       
       Logger.info("OAuth tokens saved to Firestore", { userId });
