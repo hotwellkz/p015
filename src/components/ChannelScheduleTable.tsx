@@ -117,8 +117,8 @@ const ChannelScheduleTable = ({
         </table>
       </div>
 
-      {/* Мобильная версия - карточки */}
-      <div className="space-y-3 md:hidden">
+      {/* Мобильная версия - карточки (всегда развернуты) */}
+      <div className="space-y-2 md:hidden">
         {items.map((item) => (
           <ChannelScheduleRow
             key={item.id}

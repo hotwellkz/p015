@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Edit2, Save, X, Plus, Trash2, Loader2, ChevronDown } from "lucide-react";
+import { Edit2, Save, X, Plus, Trash2, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { updateChannelSchedule, type ChannelScheduleItem } from "../api/channelSchedule";
 import type { ConflictKey } from "../utils/scheduleConflicts";
@@ -102,7 +102,6 @@ const ChannelScheduleRow = ({
   const [isSaving, setIsSaving] = useState(false);
   const [editedTimes, setEditedTimes] = useState<string[]>([]);
   const [timeErrors, setTimeErrors] = useState<Record<number, string>>({});
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleEdit = () => {
     setEditedTimes([...item.times]);
@@ -240,35 +239,32 @@ const ChannelScheduleRow = ({
       : `${item.times.length} публикаций: ${item.times[0]}...${item.times[item.times.length - 1]}`
     : "Нет публикаций";
 
-  // Мобильная версия - карточка с аккордионом
+  // Мобильная версия - карточка (всегда развернута)
   if (isMobile) {
     const validTimes = isEditing ? editedTimes.filter(t => t.trim()) : item.times;
     
     return (
       <div
-        className={`rounded-lg border border-white/10 bg-slate-900/50 transition ${
+        className={`w-full rounded-lg border border-white/10 bg-slate-900/50 transition ${
           isEditing ? "bg-slate-800/50" : ""
         } ${!item.isAutomationEnabled ? "opacity-60" : ""} ${
           isActiveRow && !isEditing ? "border-emerald-500/30 bg-emerald-500/5" : ""
         }`}
       >
         {/* Шапка карточки */}
-        <div className="flex items-start justify-between gap-3 p-3">
+        <div className="flex items-start justify-between gap-3 p-3 pb-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">#{String(item.index).padStart(3, "0")}</span>
+              <span className="text-xs text-slate-400 flex-shrink-0">#{String(item.index).padStart(3, "0")}</span>
               <button
                 onClick={handleChannelClick}
                 disabled={isEditing}
-                className="text-left transition hover:text-brand disabled:cursor-default disabled:hover:text-white"
+                className="text-left transition hover:text-brand disabled:cursor-default disabled:hover:text-white flex-1 min-w-0"
               >
                 <div className="font-medium text-white truncate">{item.name}</div>
                 <div className="text-xs text-slate-400">{item.platform}</div>
               </button>
             </div>
-            {!isExpanded && (
-              <div className="mt-2 text-xs text-slate-300">{scheduleSummary}</div>
-            )}
             {!item.isAutomationEnabled && (
               <span className="mt-1 inline-block rounded bg-red-500/20 px-2 py-0.5 text-xs text-red-300">
                 Выключена
@@ -276,18 +272,6 @@ const ChannelScheduleRow = ({
             )}
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            {!isEditing && (
-              <button
-                type="button"
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="rounded p-1.5 text-slate-400 transition hover:bg-slate-800/50 hover:text-white"
-                aria-label={isExpanded ? "Свернуть" : "Развернуть"}
-              >
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                />
-              </button>
-            )}
             {!isEditing ? (
               <button
                 type="button"
@@ -324,56 +308,61 @@ const ChannelScheduleRow = ({
           </div>
         </div>
 
-        {/* Раскрываемая часть с расписанием */}
-        {(isExpanded || isEditing) && (
-          <div className="border-t border-white/10 p-3">
-            {isEditing ? (
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  {editedTimes.map((time, idx) => (
-                    <div key={idx} className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="time"
-                          value={formatTimeForInput(time)}
-                          onChange={(e) => handleTimeChange(idx, e.target.value)}
+        {/* Расписание - всегда видно */}
+        <div className="px-3 pb-3">
+          {isEditing ? (
+            <div className="space-y-2">
+              <div className="space-y-2">
+                {editedTimes.map((time, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="time"
+                        value={formatTimeForInput(time)}
+                        onChange={(e) => handleTimeChange(idx, e.target.value)}
+                        disabled={isSaving}
+                        className={`flex-1 rounded border px-3 py-2 text-sm font-mono outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 disabled:opacity-50 ${
+                          timeErrors[idx]
+                            ? "border-red-500 bg-red-500/10 text-red-200"
+                            : "border-white/10 bg-slate-950/60 text-white"
+                        }`}
+                      />
+                      {time && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTime(idx)}
                           disabled={isSaving}
-                          className={`flex-1 rounded border px-3 py-2 text-sm font-mono outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 disabled:opacity-50 ${
-                            timeErrors[idx]
-                              ? "border-red-500 bg-red-500/10 text-red-200"
-                              : "border-white/10 bg-slate-950/60 text-white"
-                          }`}
-                        />
-                        {time && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveTime(idx)}
-                            disabled={isSaving}
-                            className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded p-2 text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
-                            title="Удалить время"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        )}
-                      </div>
-                      {timeErrors[idx] && (
-                        <div className="text-xs text-red-400">{timeErrors[idx]}</div>
+                          className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded p-2 text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
+                          title="Удалить время"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       )}
                     </div>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleAddTime}
-                  disabled={isSaving || editedTimes.length >= 10}
-                  className="w-full min-h-[40px] rounded border border-white/10 bg-slate-800/50 px-3 py-2 text-sm text-slate-300 transition hover:bg-slate-700/50 disabled:opacity-50"
-                >
-                  <Plus size={16} className="inline mr-2" />
-                  Добавить время
-                </button>
+                    {timeErrors[idx] && (
+                      <div className="text-xs text-red-400">{timeErrors[idx]}</div>
+                    )}
+                  </div>
+                ))}
               </div>
-            ) : (
-              <div className="space-y-3">
+              <button
+                type="button"
+                onClick={handleAddTime}
+                disabled={isSaving || editedTimes.length >= 10}
+                className="w-full min-h-[40px] rounded border border-white/10 bg-slate-800/50 px-3 py-2 text-sm text-slate-300 transition hover:bg-slate-700/50 disabled:opacity-50"
+              >
+                <Plus size={16} className="inline mr-2" />
+                Добавить время
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="text-xs text-slate-400 mb-1">
+                {validTimes.length > 0 
+                  ? `${validTimes.length} ${validTimes.length === 1 ? 'публикация' : validTimes.length < 5 ? 'публикации' : 'публикаций'}`
+                  : 'Нет публикаций'}
+              </div>
+              {validTimes.length > 0 ? (
                 <div className="overflow-x-auto -mx-3 px-3">
                   <div className="flex gap-2 pb-2">
                     {validTimes.map((time, idx) => {
@@ -393,7 +382,7 @@ const ChannelScheduleRow = ({
                       return (
                         <div
                           key={idx}
-                          className={`flex-shrink-0 rounded border px-2.5 py-1.5 text-xs font-mono transition ${
+                          className={`flex-shrink-0 rounded border px-2.5 py-1.5 text-xs font-mono transition whitespace-nowrap ${
                             isActiveCell
                               ? "border-emerald-500/50 bg-emerald-500/20 text-emerald-300 font-semibold"
                               : isNextCell
@@ -411,15 +400,14 @@ const ChannelScheduleRow = ({
                     })}
                   </div>
                 </div>
-                {validTimes.length === 0 && (
-                  <p className="text-xs text-slate-400 text-center py-2">
-                    Нет публикаций в расписании
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+              ) : (
+                <p className="text-xs text-slate-400 py-1">
+                  Нет публикаций в расписании
+                </p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     );
   }
