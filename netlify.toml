@@ -1,0 +1,15 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Примечание: Если сборка падает из-за обнаружения Firebase API ключей в бандле,
+# настройте переменные окружения в Netlify Dashboard:
+# - SECRETS_SCAN_SMART_DETECTION_ENABLED=false (отключить умное сканирование)
+# - или SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES=AIza* (исключить только Firebase ключи)
+# См. NETLIFY_ENV_VARS.md для подробностей
+
