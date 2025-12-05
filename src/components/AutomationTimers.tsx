@@ -106,27 +106,27 @@ export default function AutomationTimers({ stateInfo, minIntervalMinutes, isMobi
     const previousTime = formatTime(stateInfo.previousSlotDate, stateInfo.previousSlotTime);
 
     if (isMobile) {
-      // Мобильная версия - одна колонка
+      // Мобильная версия - одна колонка, компактная
       return (
-        <div className="mt-2 space-y-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2">
+        <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5 space-y-1">
           {showCountdown && (
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-400">До завершения запуска:</span>
-              <span className="font-mono font-semibold text-emerald-300 tabular-nums">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] sm:text-xs text-slate-400 leading-tight whitespace-nowrap">До завершения запуска:</span>
+              <span className="font-mono font-semibold text-emerald-300 tabular-nums text-sm sm:text-base leading-none flex-shrink-0">
                 {formatTimeRemaining(remainingSeconds)}
               </span>
             </div>
           )}
           {nextTime && (
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-400">Следующая автоматизация:</span>
-              <span className="font-mono text-emerald-200 tabular-nums">{nextTime}</span>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] sm:text-xs text-slate-400 leading-tight whitespace-nowrap">Следующая автоматизация:</span>
+              <span className="font-mono text-emerald-200 tabular-nums text-xs sm:text-sm leading-none flex-shrink-0">{nextTime}</span>
             </div>
           )}
           {previousTime && (
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-400">Последняя автоматизация:</span>
-              <span className="font-mono text-emerald-200 tabular-nums">{previousTime}</span>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] sm:text-xs text-slate-400 leading-tight whitespace-nowrap">Последняя автоматизация:</span>
+              <span className="font-mono text-emerald-200 tabular-nums text-xs sm:text-sm leading-none flex-shrink-0">{previousTime}</span>
             </div>
           )}
         </div>
@@ -168,10 +168,10 @@ export default function AutomationTimers({ stateInfo, minIntervalMinutes, isMobi
 
     if (isMobile) {
       return (
-        <div className="mt-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-1.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-400">Запуск через:</span>
-            <span className="font-mono font-semibold text-amber-300 tabular-nums">
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] sm:text-xs text-slate-400 leading-tight whitespace-nowrap">Запуск через:</span>
+            <span className="font-mono font-semibold text-amber-300 tabular-nums text-sm sm:text-base leading-none flex-shrink-0">
               {formatTimeRemaining(nextCountdown)}
             </span>
           </div>
@@ -199,10 +199,10 @@ export default function AutomationTimers({ stateInfo, minIntervalMinutes, isMobi
 
     if (isMobile) {
       return (
-        <div className="mt-2 rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-1.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-400">Автоматизация была в:</span>
-            <span className="font-mono text-blue-200 tabular-nums">{previousTime}</span>
+        <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-2">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] sm:text-xs text-slate-400 leading-tight whitespace-nowrap">Автоматизация была в:</span>
+            <span className="font-mono text-blue-200 tabular-nums text-xs sm:text-sm leading-none flex-shrink-0">{previousTime}</span>
           </div>
         </div>
       );

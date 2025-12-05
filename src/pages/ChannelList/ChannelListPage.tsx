@@ -195,7 +195,7 @@ const ChannelListPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 px-3 py-4 text-white sm:px-4 sm:py-10">
+    <div className="min-h-screen bg-slate-950 px-3 py-3 text-white sm:px-4 sm:py-10 md:py-10">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 sm:gap-8">
         {/* Десктопная версия заголовка */}
         <header className="hidden flex-col gap-4 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900 to-slate-950 p-8 shadow-2xl shadow-brand/10 md:flex">
@@ -378,7 +378,7 @@ const ChannelListPage = () => {
               items={localChannels.map((ch) => ch.id)}
               strategy={rectSortingStrategy}
             >
-              <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-2.5 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 pb-6 sm:pb-0">
                 {localChannels.map((channel, index) => {
                   const stateInfo = channelStates.get(channel.id);
                   return (

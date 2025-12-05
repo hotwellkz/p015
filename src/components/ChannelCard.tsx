@@ -423,35 +423,37 @@ const ChannelCard = ({
         className={`md:hidden w-full rounded-xl border border-white/10 bg-slate-900/60 text-white transition ${getAutomationClasses()}`}
       >
         {/* Сжатое состояние - всегда видно */}
-        <div className="p-3">
+        <div className="px-4 py-3">
           {/* Лейбл состояния автоматизации */}
           {automationState !== "default" && (
-            <div className={`mb-2 text-[9px] font-semibold uppercase tracking-wider ${labelColor}`}>
+            <div className={`mb-1.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider leading-tight ${labelColor}`}>
               {getAutomationLabel()}
             </div>
           )}
           {/* Таймеры и время автоматизации */}
           {automationStateInfo && automationStateInfo.state !== "default" && (
-            <AutomationTimers 
-              stateInfo={automationStateInfo} 
-              minIntervalMinutes={minIntervalMinutes}
-              isMobile={true}
-            />
+            <div className="mb-2">
+              <AutomationTimers 
+                stateInfo={automationStateInfo} 
+                minIntervalMinutes={minIntervalMinutes}
+                isMobile={true}
+              />
+            </div>
           )}
-          <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="flex items-start justify-between gap-2 mb-1.5">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <button
                   type="button"
                   {...attributes}
                   {...listeners}
-                  className="cursor-grab active:cursor-grabbing touch-none text-slate-400 hover:text-slate-200 transition-colors flex-shrink-0"
+                  className="cursor-grab active:cursor-grabbing touch-none text-slate-400 hover:text-slate-200 transition-colors flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center -ml-2"
                   title="Перетащите для изменения порядка"
                   aria-label="Перетащить канал"
                 >
                   <GripVertical size={14} />
                 </button>
-                <div className="text-sm font-semibold text-white truncate">
+                <div className="text-[15px] sm:text-base font-semibold text-white truncate leading-tight">
                   {number}. {channel.name}
                 </div>
               </div>
@@ -459,11 +461,11 @@ const ChannelCard = ({
                 <span className="h-1 w-1 rounded-full bg-emerald-400" />
                 <span>{platformLabels[channel.platform]}</span>
               </div>
-              <div className="text-[11px] text-slate-400 line-clamp-1">
+              <div className="text-[11px] sm:text-xs text-slate-400 line-clamp-2 leading-snug">
                 {summaryParts.join(" • ")}
               </div>
             </div>
-            <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="flex items-center gap-1 flex-shrink-0 ml-2">
               {hasSocialLinks && (
                 <div className="flex items-center gap-0.5 mr-1">
                   {channel.youtubeUrl && (
@@ -501,7 +503,7 @@ const ChannelCard = ({
               <button
                 type="button"
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="flex min-h-[32px] min-w-[32px] items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800/50 hover:text-white"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800/50 hover:text-white"
                 aria-label={isExpanded ? "Свернуть" : "Развернуть"}
               >
                 <ChevronDown
@@ -516,7 +518,7 @@ const ChannelCard = ({
             <button
               type="button"
               onClick={onGenerate}
-              className="flex-1 min-h-[40px] rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-dark"
+              className="flex-1 min-h-[44px] rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
             >
               Сгенерировать
             </button>
@@ -524,17 +526,17 @@ const ChannelCard = ({
               <button
                 type="button"
                 onClick={onCustomPrompt}
-                className="min-h-[40px] rounded-lg border border-white/15 bg-slate-800/50 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-brand/50 hover:bg-slate-700/50 hover:text-white"
+                className="min-h-[44px] min-w-[44px] rounded-lg border border-white/15 bg-slate-800/50 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-brand/50 hover:bg-slate-700/50 hover:text-white flex items-center justify-center"
                 title="Свой промпт"
               >
-                <FileText size={14} />
+                <FileText size={16} />
               </button>
             )}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setShowMobileActionsMenu(!showMobileActionsMenu)}
-                className="flex min-h-[40px] min-w-[40px] items-center justify-center rounded-lg border border-white/15 bg-slate-800/50 text-slate-300 transition hover:bg-slate-700/50"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-white/15 bg-slate-800/50 text-slate-300 transition hover:bg-slate-700/50"
                 aria-label="Дополнительные действия"
               >
                 <MoreVertical size={16} />
@@ -589,7 +591,7 @@ const ChannelCard = ({
 
         {/* Раскрываемая часть */}
         {isExpanded && (
-          <div className="border-t border-white/10 px-3 pb-3 pt-2 space-y-2">
+          <div className="border-t border-white/10 px-4 pb-3 pt-2.5 space-y-2">
             {/* Полное описание */}
             {channel.extraNotes && (
               <div>
@@ -642,7 +644,7 @@ const ChannelCard = ({
                 <button
                   type="button"
                   onClick={onAutoGenerate}
-                  className="flex items-center gap-1.5 rounded-lg bg-brand/80 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-dark"
+                  className="flex items-center gap-1.5 rounded-lg bg-brand/80 px-3 py-2.5 min-h-[44px] text-xs font-semibold text-white transition hover:bg-brand-dark"
                 >
                   <Sparkles size={12} />
                   ИИ-идея
@@ -651,14 +653,14 @@ const ChannelCard = ({
               <button
                 type="button"
                 onClick={onEdit}
-                className="flex items-center gap-1.5 rounded-lg border border-white/15 px-3 py-2 text-xs text-slate-200 transition hover:border-brand/50 hover:text-white"
+                className="flex items-center gap-1.5 rounded-lg border border-white/15 px-3 py-2.5 min-h-[44px] text-xs text-slate-200 transition hover:border-brand/50 hover:text-white"
               >
                 Редактировать
               </button>
               <button
                 type="button"
                 onClick={onDelete}
-                className="flex items-center gap-1.5 rounded-lg border border-red-500/30 px-3 py-2 text-xs text-red-400 transition hover:bg-red-500/10"
+                className="flex items-center gap-1.5 rounded-lg border border-red-500/30 px-3 py-2.5 min-h-[44px] text-xs text-red-400 transition hover:bg-red-500/10"
               >
                 Удалить
               </button>
