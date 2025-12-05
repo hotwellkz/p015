@@ -5,10 +5,13 @@ import { CSS } from "@dnd-kit/utilities";
 import type { Channel } from "../domain/channel";
 import { timestampToIso } from "../utils/firestore";
 
+export type ChannelAutomationState = "current" | "next" | "previous" | "default";
+
 interface ChannelCardProps {
   channel: Channel;
   index?: number; // порядковый номер (0-based)
   compact?: boolean;
+  automationState?: ChannelAutomationState; // Состояние автоматизации для подсветки
   onEdit: () => void;
   onDelete: () => void;
   onGenerate: () => void;
@@ -33,6 +36,7 @@ const ChannelCard = ({
   channel,
   index,
   compact = true,
+  automationState = "default",
   onEdit,
   onDelete,
   onGenerate,
@@ -103,6 +107,41 @@ const ChannelCard = ({
     channel.niche ? `ниша: ${channel.niche}` : null
   ].filter(Boolean);
 
+  // Определяем CSS классы для подсветки
+  const getAutomationClasses = () => {
+    switch (automationState) {
+      case "current":
+        return "channel-card--current border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-500/5 to-transparent shadow-[0_0_20px_rgba(34,197,94,0.15)]";
+      case "next":
+        return "channel-card--next border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-500/5 to-transparent shadow-[0_0_20px_rgba(250,204,21,0.15)]";
+      case "previous":
+        return "channel-card--previous border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-500/5 to-transparent shadow-[0_0_20px_rgba(59,130,246,0.15)]";
+      default:
+        return "";
+    }
+  };
+
+  const getAutomationLabel = () => {
+    switch (automationState) {
+      case "current":
+        return "Сейчас идёт автоматизация";
+      case "next":
+        return "Следующий по расписанию";
+      case "previous":
+        return "Последний запуск";
+      default:
+        return null;
+    }
+  };
+
+  const labelColor = automationState === "current" 
+    ? "text-emerald-300" 
+    : automationState === "next" 
+    ? "text-amber-300" 
+    : automationState === "previous"
+    ? "text-blue-300"
+    : "";
+
   return (
     <div
       ref={setNodeRef}
@@ -113,14 +152,20 @@ const ChannelCard = ({
     >
       {/* Десктопная версия */}
       <div
-        className={`hidden md:block group relative rounded-2xl border border-white/10 bg-slate-900/60 p-4 text-white shadow-sm transition hover:border-brand/50 hover:shadow-lg`}
+        className={`hidden md:block group relative rounded-2xl border border-white/10 bg-slate-900/60 p-4 text-white shadow-sm transition hover:border-brand/50 hover:shadow-lg ${getAutomationClasses()}`}
         onMouseLeave={() => {
           if (!isTouchDevice) setShowDetails(false);
         }}
       >
         <div className="flex flex-col justify-between h-full">
-      {/* Заголовок: номер + имя + платформа */}
-      <div className="mb-2 flex items-start justify-between gap-2">
+          {/* Лейбл состояния автоматизации */}
+          {automationState !== "default" && (
+            <div className={`mb-2 text-[10px] font-semibold uppercase tracking-wider ${labelColor}`}>
+              {getAutomationLabel()}
+            </div>
+          )}
+          {/* Заголовок: номер + имя + платформа */}
+          <div className="mb-2 flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <button
@@ -351,10 +396,16 @@ const ChannelCard = ({
 
       {/* Мобильная версия - карточка с двумя состояниями */}
       <div
-        className={`md:hidden w-full rounded-xl border border-white/10 bg-slate-900/60 text-white transition`}
+        className={`md:hidden w-full rounded-xl border border-white/10 bg-slate-900/60 text-white transition ${getAutomationClasses()}`}
       >
         {/* Сжатое состояние - всегда видно */}
         <div className="p-3">
+          {/* Лейбл состояния автоматизации */}
+          {automationState !== "default" && (
+            <div className={`mb-2 text-[9px] font-semibold uppercase tracking-wider ${labelColor}`}>
+              {getAutomationLabel()}
+            </div>
+          )}
           <div className="flex items-start justify-between gap-2 mb-2">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">

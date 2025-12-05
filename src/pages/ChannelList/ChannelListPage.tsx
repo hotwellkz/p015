@@ -24,6 +24,8 @@ import NotificationBell from "../../components/NotificationBell";
 import { useAuthStore } from "../../stores/authStore";
 import { useChannelStore } from "../../stores/channelStore";
 import type { Channel } from "../../domain/channel";
+import { calculateChannelStates, type ChannelStateInfo } from "../../utils/channelAutomationState";
+import { fetchScheduleSettings } from "../../api/scheduleSettings";
 
 const ChannelListPage = () => {
   const navigate = useNavigate();
@@ -49,6 +51,8 @@ const ChannelListPage = () => {
     useState<Channel | null>(null);
   const [localChannels, setLocalChannels] = useState<Channel[]>([]);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [channelStates, setChannelStates] = useState<Map<string, ChannelStateInfo>>(new Map());
+  const [minIntervalMinutes, setMinIntervalMinutes] = useState(11);
 
   // Синхронизируем локальное состояние с глобальным
   useEffect(() => {
@@ -106,6 +110,39 @@ const ChannelListPage = () => {
       void fetchChannels(user.uid);
     }
   }, [user?.uid, fetchChannels]);
+
+  // Загружаем настройки расписания для получения minIntervalMinutes
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const settings = await fetchScheduleSettings();
+        setMinIntervalMinutes(settings.minIntervalMinutes || 11);
+      } catch (error) {
+        console.error("Failed to load schedule settings:", error);
+      }
+    };
+    void loadSettings();
+  }, []);
+
+  // Вычисляем состояния каналов
+  useEffect(() => {
+    if (localChannels.length === 0) {
+      setChannelStates(new Map());
+      return;
+    }
+
+    const recalculateStates = () => {
+      const states = calculateChannelStates(localChannels, minIntervalMinutes);
+      setChannelStates(states);
+    };
+
+    recalculateStates();
+
+    // Обновляем каждые 30 секунд
+    const intervalId = setInterval(recalculateStates, 30_000);
+
+    return () => clearInterval(intervalId);
+  }, [localChannels, minIntervalMinutes]);
 
   const handleDelete = async (channelId: string) => {
     if (!user?.uid) {
@@ -342,19 +379,23 @@ const ChannelListPage = () => {
               strategy={rectSortingStrategy}
             >
               <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-                {localChannels.map((channel, index) => (
-                  <ChannelCard
-                    key={channel.id}
-                    channel={channel}
-                    index={index}
-                    compact
-                    onEdit={() => goToEdit(channel.id)}
-                    onDelete={() => handleDelete(channel.id)}
-                    onGenerate={() => goToGeneration(channel.id)}
-                    onAutoGenerate={() => handleAutoGenerate(channel)}
-                    onCustomPrompt={() => handleCustomPrompt(channel)}
-                  />
-                ))}
+                {localChannels.map((channel, index) => {
+                  const stateInfo = channelStates.get(channel.id);
+                  return (
+                    <ChannelCard
+                      key={channel.id}
+                      channel={channel}
+                      index={index}
+                      compact
+                      automationState={stateInfo?.state || "default"}
+                      onEdit={() => goToEdit(channel.id)}
+                      onDelete={() => handleDelete(channel.id)}
+                      onGenerate={() => goToGeneration(channel.id)}
+                      onAutoGenerate={() => handleAutoGenerate(channel)}
+                      onCustomPrompt={() => handleCustomPrompt(channel)}
+                    />
+                  );
+                })}
               </div>
             </SortableContext>
           </DndContext>
