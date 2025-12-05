@@ -221,25 +221,48 @@ router.post("/sendPromptToSyntx", authRequired, async (req, res) => {
     return res.status(400).json({ error: "prompt is required" });
   }
 
+  // Проверяем наличие SYNX_CHAT_ID перед выполнением
+  if (!process.env.SYNX_CHAT_ID) {
+    Logger.error("SYNX_CHAT_ID is not configured");
+    return res.status(500).json({
+      error: "SYNX_CHAT_ID_NOT_CONFIGURED",
+      message: "SYNX_CHAT_ID не настроен на сервере. Добавьте переменную окружения в Cloud Run."
+    });
+  }
+
   try {
     // Используем глобальную сессию (userId не нужен, используем пустую строку)
     await sendPromptFromUserToSyntx("", prompt);
     return res.json({ status: "sent" });
   } catch (err: any) {
+    const errorMessage = String(err?.message ?? err);
+    
     if (err instanceof TelegramSessionExpiredError) {
       return res
         .status(401)
         .json({ error: "TELEGRAM_SESSION_EXPIRED_NEED_RELOGIN" });
     }
-    if (String(err?.message ?? err) === "TELEGRAM_SESSION_NOT_INITIALIZED") {
+    
+    if (errorMessage === "TELEGRAM_SESSION_NOT_INITIALIZED") {
       return res.status(400).json({
         error: "TELEGRAM_SESSION_NOT_INITIALIZED",
         message:
           "Telegram сессия не инициализирована. Запустите 'npm run dev:login' в папке backend."
       });
     }
-    console.error("Error in /api/telegram/sendPromptToSyntx", err);
-    return res.status(500).json({ error: "FAILED_TO_SEND_PROMPT" });
+    
+    if (errorMessage.includes("SYNX_CHAT_ID is not configured")) {
+      return res.status(500).json({
+        error: "SYNX_CHAT_ID_NOT_CONFIGURED",
+        message: "SYNX_CHAT_ID не настроен на сервере. Добавьте переменную окружения в Cloud Run."
+      });
+    }
+    
+    Logger.error("Error in /api/telegram/sendPromptToSyntx", err);
+    return res.status(500).json({ 
+      error: "FAILED_TO_SEND_PROMPT",
+      message: errorMessage || "Ошибка при отправке промпта"
+    });
   }
 });
 

@@ -97,6 +97,8 @@ gcloud run deploy shorts-backend \
 - `TELEGRAM_API_ID` - ID Telegram API
 - `TELEGRAM_API_HASH` - Hash Telegram API
 - `TELEGRAM_SESSION_SECRET` - Секрет для шифрования сессий (64 символа hex)
+- `TELEGRAM_SESSION_ENCRYPTED` - Зашифрованная Telegram сессия (см. [TELEGRAM_CLOUD_RUN_SETUP.md](./TELEGRAM_CLOUD_RUN_SETUP.md))
+- `SYNX_CHAT_ID` - ID чата SyntX (например, `@syntxaibot`)
 - `JWT_SECRET` - Секрет для JWT токенов
 - `CRON_SECRET` - Секрет для cron jobs
 - `FRONTEND_ORIGIN` - URL фронтенда (например, https://your-site.netlify.app)
@@ -106,6 +108,26 @@ gcloud run deploy shorts-backend \
 - `GOOGLE_DRIVE_PRIVATE_KEY` - Приватный ключ для Google Drive
 - `GOOGLE_DRIVE_DEFAULT_PARENT` - ID папки по умолчанию
 - `PORT` - Порт (по умолчанию 8080)
+- `ENABLE_CRON_SCHEDULER` - Включить cron планировщик (`false` для Cloud Run)
+
+### ⚠️ Важно: Настройка Telegram сессии
+
+**Перед деплоем необходимо настроить Telegram авторизацию:**
+
+1. **Локально выполните логин:**
+   ```bash
+   cd backend
+   npm run dev:login
+   ```
+
+2. **Экспортируйте сессию:**
+   ```bash
+   npm run export:telegram-session
+   ```
+
+3. **Добавьте значение `TELEGRAM_SESSION_ENCRYPTED` в Cloud Run**
+
+Подробная инструкция: [TELEGRAM_CLOUD_RUN_SETUP.md](./TELEGRAM_CLOUD_RUN_SETUP.md)
 
 ### Через gcloud CLI
 
