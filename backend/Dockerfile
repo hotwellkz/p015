@@ -20,6 +20,7 @@ COPY --from=builder /app/package*.json ./
 RUN npm install --omit=dev
 
 COPY --from=builder /app/dist ./dist
+COPY public ./public
 
 EXPOSE 8080
 
