@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, Clock, Languages, Users, Sparkles, GripVertical, FileText, ChevronDown, MoreVertical } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Channel } from "../domain/channel";
 import { timestampToIso } from "../utils/firestore";
+import AutomationTimers from "./AutomationTimers";
+import type { ChannelStateInfo } from "../utils/channelAutomationState";
 
 export type ChannelAutomationState = "current" | "next" | "previous" | "default";
 
@@ -12,6 +14,8 @@ interface ChannelCardProps {
   index?: number; // порядковый номер (0-based)
   compact?: boolean;
   automationState?: ChannelAutomationState; // Состояние автоматизации для подсветки
+  automationStateInfo?: ChannelStateInfo; // Полная информация о состоянии автоматизации
+  minIntervalMinutes?: number; // Минимальный интервал для вычисления таймеров
   onEdit: () => void;
   onDelete: () => void;
   onGenerate: () => void;
@@ -37,12 +41,24 @@ const ChannelCard = ({
   index,
   compact = true,
   automationState = "default",
+  automationStateInfo,
+  minIntervalMinutes = 11,
   onEdit,
   onDelete,
   onGenerate,
   onAutoGenerate,
   onCustomPrompt
 }: ChannelCardProps) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
   const [showDetails, setShowDetails] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showMobileActionsMenu, setShowMobileActionsMenu] = useState(false);
@@ -163,6 +179,14 @@ const ChannelCard = ({
             <div className={`mb-2 text-[10px] font-semibold uppercase tracking-wider ${labelColor}`}>
               {getAutomationLabel()}
             </div>
+          )}
+          {/* Таймеры и время автоматизации */}
+          {automationStateInfo && automationStateInfo.state !== "default" && (
+            <AutomationTimers 
+              stateInfo={automationStateInfo} 
+              minIntervalMinutes={minIntervalMinutes}
+              isMobile={false}
+            />
           )}
           {/* Заголовок: номер + имя + платформа */}
           <div className="mb-2 flex items-start justify-between gap-2">
@@ -405,6 +429,14 @@ const ChannelCard = ({
             <div className={`mb-2 text-[9px] font-semibold uppercase tracking-wider ${labelColor}`}>
               {getAutomationLabel()}
             </div>
+          )}
+          {/* Таймеры и время автоматизации */}
+          {automationStateInfo && automationStateInfo.state !== "default" && (
+            <AutomationTimers 
+              stateInfo={automationStateInfo} 
+              minIntervalMinutes={minIntervalMinutes}
+              isMobile={true}
+            />
           )}
           <div className="flex items-start justify-between gap-2 mb-2">
             <div className="flex-1 min-w-0">

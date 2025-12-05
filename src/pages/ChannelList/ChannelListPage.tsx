@@ -388,6 +388,8 @@ const ChannelListPage = () => {
                       index={index}
                       compact
                       automationState={stateInfo?.state || "default"}
+                      automationStateInfo={stateInfo}
+                      minIntervalMinutes={minIntervalMinutes}
                       onEdit={() => goToEdit(channel.id)}
                       onDelete={() => handleDelete(channel.id)}
                       onGenerate={() => goToGeneration(channel.id)}
